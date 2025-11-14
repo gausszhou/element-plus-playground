@@ -2,6 +2,8 @@
   <router-link to="/">FormDisable</router-link>
   <span> | </span>
   <router-link to="/form-disabled-form-enable">FormDisableEnable</router-link>
+  <span> | </span>
+  <router-link to="/table-with-generic-type">TableWithGenericType</router-link>
   <router-view></router-view>
 </template>
 
