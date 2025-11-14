@@ -1,32 +1,52 @@
-<template>
-  <th class="Column">
-    <slot :row="_row" :$index="$index"></slot>
-  </th>
-</template>
-
 <script lang="ts" setup generic="T extends ITableRow">
-import { getCurrentInstance, inject, ref, type VNode } from "vue";
-import { createTableInjectionKey, createTableRowInjectionKey, type ITableColumnConfig, type ITableColumnProps, type ITableRow } from "./types";
+import {
+  getCurrentInstance,
+  inject,
+  onMounted,
+  onUnmounted,
+  useSlots,
+  type VNode,
+} from "vue";
+import {
+  createTableInjectionKey,
+  type ITableColumnConfig,
+  type ITableColumnProps,
+  type ITableRow,
+  type ITableScope,
+} from "./types";
 
 const props = defineProps<ITableColumnProps>();
 const tableProvider = inject(createTableInjectionKey<T>());
-const rowProvider = inject(createTableRowInjectionKey<T>());
-const _row = ref(rowProvider!.row);
-const $index = ref(rowProvider!.$index);
+const slots = useSlots();
 
 const instance = getCurrentInstance();
 
-if (instance) {
-  const columnConfig: ITableColumnConfig = {
-      id: instance.uid,
+onMounted(() => {
+  if (tableProvider) {
+    const columnConfig: ITableColumnConfig = {
+      id: instance!.uid,
       prop: props.prop,
       label: props.label,
-      width: props.width
+      width: props.width,
+      renderCell: (scope: ITableScope<T>) => {
+        // 如果有用户提供的插槽，使用插槽内容
+        if (slots.default) {
+          return slots.default(scope);
+        }
+        // 否则使用默认渲染
+        return scope.row[props.prop as keyof T] ?? "";
+      },
+    };
+    tableProvider?.registerColumn(columnConfig);
   }
-  tableProvider?.registerColumn(columnConfig)
-}
+});
+
+onUnmounted(() => {
+  if (!instance || !tableProvider) return;
+  tableProvider.unregisterColumn({ id: instance.uid.toString() });
+});
 
 defineSlots<{
-  default?: (props: { row: T, $index: number }) => VNode | VNode[];
+  default?: (props: ITableScope<T>) => VNode | VNode[];
 }>();
 </script>

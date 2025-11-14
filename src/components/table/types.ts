@@ -1,8 +1,9 @@
 // types.ts
-import type { InjectionKey, Ref } from "vue";
+import type { InjectionKey } from "vue";
 
 export interface ITable<T> {
   data: T[];
+ align?: "left" | "center" | "right";
 }
 
 // 基础表格行类型
@@ -15,6 +16,7 @@ export interface ITableColumnConfig {
   label?: string;
   width?: number | string;
   align?: "left" | "center" | "right";
+  renderCell(scope: ITableRow): any;
 }
 
 // 表格列属性
@@ -26,25 +28,22 @@ export interface ITableColumnProps {
 }
 
 // 表格注入接口（关键：使用泛型传递数据类型）
-export interface ITableInjection<T extends ITableRow = ITableRow> {
+export interface ITableInjection<T> {
   registerColumn(column: ITableColumnConfig): void;
+  unregisterColumn({ id }: { id: number | string }): void;
 }
 
 // 行作用域注入接口
-export interface ITableRowProvider<T extends ITableRow = ITableRow> {
+export interface ITableScope<T> {
   row: T;
   $index: number;
 }
 
 // 注入键（使用泛型工厂函数）
-export function createTableInjectionKey<T extends ITableRow>() {
-  return Symbol("el-table") as InjectionKey<ITableInjection<T>>;
-}
-
-export function createTableRowInjectionKey<T extends ITableRow>() {
-  return Symbol("el-table-row") as InjectionKey<ITableRowProvider<T>>;
+export function createTableInjectionKey<T extends any>() {
+  return "table" as unknown as InjectionKey<ITableInjection<T>>;
 }
 
 // 默认注入键（用于未知类型）
 export const TABLE_INJECTION_KEY = createTableInjectionKey();
-export const TABLE_ROW_INJECTION_KEY = createTableRowInjectionKey();
+

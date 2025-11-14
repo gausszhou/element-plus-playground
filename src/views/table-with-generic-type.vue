@@ -1,7 +1,7 @@
 <template>
-  <TableEntry :data="tableData">
-    <TableColumn prop="name" label="姓名" />
-    <TableColumn prop="age" label="年龄" />
+  <TableEntry :data="tableData" align="left">
+    <TableColumn prop="name" label="姓名" :width="100" />
+    <TableColumn prop="age" label="年龄" :width="100" />
     <TableColumnUser prop="email" label="邮箱">
       <template #default="{ row }">
         <a :href="`mailto:${row.email}`" class="email-link">
@@ -9,12 +9,12 @@
         </a>
       </template>
     </TableColumnUser>
-    <TableColumn label="操作">
+    <TableColumnUser label="操作">
       <template #default="{ row, $index }">
         <button @click="editRow(row, $index)">编辑</button>
         <button @click="deleteRow($index)">删除</button>
       </template>
-    </TableColumn>
+    </TableColumnUser>
   </TableEntry>
 </template>
 
